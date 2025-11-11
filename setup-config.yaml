@@ -5,7 +5,7 @@ psModules:
 # Applications to install via WinGet
 WinGetApps:
   # --------------------------------------------------------------------------
-  # 1. Core System Utilities & Enhancements
+  # Core System Utilities & Enhancements
   #    - General-purpose tools essential for system management or fundamental user experience.
   # --------------------------------------------------------------------------
   - name: 7-Zip
@@ -20,9 +20,11 @@ WinGetApps:
     id: Microsoft.PowerToys
   - name: Windows Terminal Preview
     id: Microsoft.WindowsTerminal.Preview
+  - name: Vivaldi Browser
+    id: Vivaldi.Vivaldi
 
   # --------------------------------------------------------------------------
-  # 2. Communication & Collaboration
+  # Communication & Collaboration
   #    - Apps for messaging, video calls, and teamwork.
   # --------------------------------------------------------------------------
   - name: WhatsApp
@@ -35,7 +37,7 @@ WinGetApps:
     id: Discord.Discord
 
   # --------------------------------------------------------------------------
-  # 3. Development & DevOps Tools
+  # Development & DevOps Tools
   #    - Applications specific to software development, version control, and infrastructure management.
   # --------------------------------------------------------------------------
   - name: Visual Studio Code
@@ -46,7 +48,7 @@ WinGetApps:
     id: Microsoft.AzureCLI
 
   # --------------------------------------------------------------------------
-  # 4. Productivity & Office
+  # Productivity & Office
   #    - General office suites, note-taking, and task management.
   # --------------------------------------------------------------------------
   - name: Notepad++
@@ -57,18 +59,16 @@ WinGetApps:
     id: Notion.Notion
 
   # --------------------------------------------------------------------------
-  # 5. Media & Streaming
-  #    - Applications for consuming, creating, or streaming media.
+  # Other
+  #
   # --------------------------------------------------------------------------
   - name: OBS Studio
     id: OBSProject.OBSStudio
-  - name: Vivaldi Browser
-    id: Vivaldi.Vivaldi
   - name: Parsec
     id: Parsec.Parsec # Remote desktop for low-latency streaming/gaming
 
   # --------------------------------------------------------------------------
-  # 6. Specialized Tools & Runtimes
+  # Specialized Tools & Runtimes
   #    - Applications that provide specific hardware control, runtimes, or foundational libraries.
   # --------------------------------------------------------------------------
   - name: Logitech Options+
@@ -91,21 +91,21 @@ WinGetApps:
     id: Microsoft.DotNet.DesktopRuntime.8
 
   # --------------------------------------------------------------------------
-  # 7. Security & Privacy
+  # Security & Privacy
   #    - Applications focused on protecting user data and online anonymity.
   # --------------------------------------------------------------------------
   - name: NordVPN
     id: NordSecurity.NordVPN
 
   # --------------------------------------------------------------------------
-  # 8. AI / Machine Learning Tools
+  # AI / Machine Learning Tools
   #    - Applications specifically designed for AI development or inference.
   # --------------------------------------------------------------------------
   - name: LM Studio
     id: ElementLabs.LMStudio
 
   # --------------------------------------------------------------------------
-  # 9. 3D Printing / CAD
+  # 3D Printing / CAD
   #    - For specialized hardware control and design.
   # --------------------------------------------------------------------------
   - name: Bambu Studio
@@ -113,9 +113,15 @@ WinGetApps:
 
 # VSCode Extensions to install
 VSCodeExtensions:
-  - ms-vscode-remote.remote-containers
-  - ms-vscode-remote.remote-wsl
-  - ms-vscode.powershell
-  - eamodio.gitlens
-  - azps-tools.azps-tools
-  - hashicorp.terraform
+  - name: Remote Containers
+    id: ms-vscode-remote.remote-containers
+  - name: WSL
+    id: ms-vscode-remote.remote-wsl
+  - name: Powershell
+    id: ms-vscode.powershell
+  - name: GitLens
+    id: eamodio.gitlens
+  - name: Azure PowerShell Tools
+    id: azps-tools.azps-tools
+  - name: HashiCorp Terraform
+    id: hashicorp.terraform

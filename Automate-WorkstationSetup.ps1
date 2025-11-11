@@ -109,16 +109,19 @@ foreach ($appObject in $WinGetApps) {
 # --------------------------------------------------------------------------
 
 Write-Host "`n--- Installing VSCode Extensions ---" -ForegroundColor Cyan
-foreach ($extensionId in $VSCodeExtensions) {
-    Write-Host "Processing VSCode extension: '$extensionId'" -ForegroundColor White
+foreach ($extension in $VSCodeExtensions) {
+    $extensionName = $extension.name
+    $extensionId = $extension.id
+
+    Write-Host "Processing VSCode extension: '$extensionName'" -ForegroundColor White
 
     # Assuming 'code' is in the system PATH
     code --install-extension "$extensionId" --force
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "  Successfully installed/updated: '$extensionId'" -ForegroundColor Green
+        Write-Host "  Successfully installed/updated: '$extensionName'" -ForegroundColor Green
     } else {
-        Write-Warning "  Failed or encountered issues installing: '$extensionId'. Exit code: $LASTEXITCODE"
+        Write-Warning "  Failed or encountered issues installing: '$extensionName'. Exit code: $LASTEXITCODE"
     }
 }
 
