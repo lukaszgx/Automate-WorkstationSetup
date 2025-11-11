@@ -1,0 +1,121 @@
+# PowerShell Modules to install from PSGallery
+psModules:
+  - Microsoft.WinGet.Client # Essential for using Get-WinGetPackage and Install-WinGetPackage cmdlets
+
+# Applications to install via WinGet
+WinGetApps:
+  # --------------------------------------------------------------------------
+  # 1. Core System Utilities & Enhancements
+  #    - General-purpose tools essential for system management or fundamental user experience.
+  # --------------------------------------------------------------------------
+  - name: 7-Zip
+    id: 7zip.7zip
+  - name: Git
+    id: Git.Git
+  - name: WinDirStat
+    id: WinDirStat.WinDirStat
+  - name: Oh My Posh
+    id: JanDeDobbeleer.OhMyPosh
+  - name: PowerToys
+    id: Microsoft.PowerToys
+  - name: Windows Terminal Preview
+    id: Microsoft.WindowsTerminal.Preview
+
+  # --------------------------------------------------------------------------
+  # 2. Communication & Collaboration
+  #    - Apps for messaging, video calls, and teamwork.
+  # --------------------------------------------------------------------------
+  - name: WhatsApp
+    id: 9NKSQGP7F2NH # WinGet ID for WhatsApp Desktop
+  - name: Keybase
+    id: Keybase.Keybase # Secure messaging and file sharing
+  - name: Microsoft Teams
+    id: Microsoft.Teams
+  - name: Discord
+    id: Discord.Discord
+
+  # --------------------------------------------------------------------------
+  # 3. Development & DevOps Tools
+  #    - Applications specific to software development, version control, and infrastructure management.
+  # --------------------------------------------------------------------------
+  - name: Visual Studio Code
+    id: Microsoft.VisualStudioCode
+  - name: Docker Desktop
+    id: Docker.DockerDesktop
+  - name: Azure CLI
+    id: Microsoft.AzureCLI
+
+  # --------------------------------------------------------------------------
+  # 4. Productivity & Office
+  #    - General office suites, note-taking, and task management.
+  # --------------------------------------------------------------------------
+  - name: Notepad++
+    id: Notepad++.Notepad++
+  - name: Microsoft Office # Note: WinGet often installs the "Microsoft 365" app, which then facilitates Office install
+    id: Microsoft.Office
+  - name: Notion
+    id: Notion.Notion
+
+  # --------------------------------------------------------------------------
+  # 5. Media & Streaming
+  #    - Applications for consuming, creating, or streaming media.
+  # --------------------------------------------------------------------------
+  - name: OBS Studio
+    id: OBSProject.OBSStudio
+  - name: Vivaldi Browser
+    id: Vivaldi.Vivaldi
+  - name: Parsec
+    id: Parsec.Parsec # Remote desktop for low-latency streaming/gaming
+
+  # --------------------------------------------------------------------------
+  # 6. Specialized Tools & Runtimes
+  #    - Applications that provide specific hardware control, runtimes, or foundational libraries.
+  # --------------------------------------------------------------------------
+  - name: Logitech Options+
+    id: Logitech.OptionsPlus
+  - name: Logitech G HUB
+    id: Logitech.GHUB
+  - name: Visual C++ Redistributables (2010 x86)
+    id: Microsoft.VCRedist.2010.x86
+  - name: Visual C++ Redistributables (2012 x86)
+    id: Microsoft.VCRedist.2012.x86
+  - name: Visual C++ Redistributables (2013 x86)
+    id: Microsoft.VCRedist.2013.x86
+  - name: Visual C++ Redistributables (2013 x64)
+    id: Microsoft.VCRedist.2013.x64
+  - name: Visual C++ Redistributables (2015+ x64)
+    id: Microsoft.VCRedist.2015+.x64
+  - name: Visual C++ Redistributables (2015+ x86)
+    id: Microsoft.VCRedist.2015+.x86
+  - name: .NET Desktop Runtime 8
+    id: Microsoft.DotNet.DesktopRuntime.8
+
+  # --------------------------------------------------------------------------
+  # 7. Security & Privacy
+  #    - Applications focused on protecting user data and online anonymity.
+  # --------------------------------------------------------------------------
+  - name: NordVPN
+    id: NordSecurity.NordVPN
+
+  # --------------------------------------------------------------------------
+  # 8. AI / Machine Learning Tools
+  #    - Applications specifically designed for AI development or inference.
+  # --------------------------------------------------------------------------
+  - name: LM Studio
+    id: ElementLabs.LMStudio
+
+  # --------------------------------------------------------------------------
+  # 9. 3D Printing / CAD
+  #    - For specialized hardware control and design.
+  # --------------------------------------------------------------------------
+  - name: Bambu Studio
+    id: Bambulab.Bambustudio
+
+# VSCode Extensions to install
+VSCodeExtensions:
+  - ms-vscode-remote.remote-containers
+  - ms-vscode-remote.remote-wsl
+  - ms-vscode.powershell
+  - eamodio.gitlens
+  - azps-tools.azps-tools
+  - hashicorp.terraform
