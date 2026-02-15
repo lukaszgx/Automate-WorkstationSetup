@@ -22,6 +22,10 @@ WinGetApps:
     id: Microsoft.WindowsTerminal.Preview
   - name: Vivaldi Browser
     id: Vivaldi.Vivaldi
+  - name: Microsoft Windows Subsystem Linux
+    id: Microsoft.WSL
+  - name: K-Lite Mega Codec Pack
+    id: CodecGuide.K-LiteCodecPack.Mega
 
   # --------------------------------------------------------------------------
   # Communication & Collaboration
@@ -59,6 +63,9 @@ WinGetApps:
     id: Microsoft.Office
   - name: Notion
     id: Notion.Notion
+  - name: SiYuan
+    id: B3log.SiYuan
+
 
   # --------------------------------------------------------------------------
   # Other
@@ -68,6 +75,8 @@ WinGetApps:
     id: OBSProject.OBSStudio
   - name: Parsec
     id: Parsec.Parsec # Remote desktop for low-latency streaming/gaming
+  - name: VLC media player
+    id: VideoLAN.VLC
 
   # --------------------------------------------------------------------------
   # Specialized Tools & Runtimes
@@ -127,6 +136,12 @@ VSCodeExtensions:
     id: azps-tools.azps-tools
   - name: HashiCorp Terraform
     id: hashicorp.terraform
+  - name: Gemini Code Assist
+    id: google.geminicodeassist
+  - name: Azure PowerShell Tools
+    id: azps-tools.azps-tools
+
+
 
 # Registry settings
 RegistrySettings:
