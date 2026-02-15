@@ -1,6 +1,6 @@
 # PowerShell Modules to install from PSGallery
 psModules:
-  - Microsoft.WinGet.Client # Essential for using Get-WinGetPackage and Install-WinGetPackage cmdlets
+  - Terminal-Icons # Icons for Oh-My-Posh
 
 # Applications to install via WinGet
 WinGetApps:
@@ -31,6 +31,8 @@ WinGetApps:
     id: 9NKSQGP7F2NH # WinGet ID for WhatsApp Desktop
   - name: Keybase
     id: Keybase.Keybase # Secure messaging and file sharing
+  - name: KeePass
+    id: DominikReichl.KeePass
   - name: Microsoft Teams
     id: Microsoft.Teams
   - name: Discord
@@ -125,3 +127,22 @@ VSCodeExtensions:
     id: azps-tools.azps-tools
   - name: HashiCorp Terraform
     id: hashicorp.terraform
+
+# Registry settings
+RegistrySettings:
+  - description: Folder Options - Hide extension for know file types - Disable
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    key: HideFileExt
+    value: 0
+  - description: Display full path in the title bar - Enable
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    key: ShowFullPath
+    value: 1
+  - description: Privacy - Show recently used files - Disable
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    key: Start_TrackDocs
+    value: 0
+  - description: Privacy - Show frequently used folder - Disable
+    path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+    key: Start_TrackFolders
+    value: 0
