@@ -1,3 +1,7 @@
+param(
+    [switch]$DryRun
+)
+
 # Function to check for administrator privileges
 Function Test-Administrator {
     Write-Host "Checking for administrator privileges..." -ForegroundColor White
@@ -17,12 +21,20 @@ Function Initialize-Prerequisites {
     # Ensure PSGallery is trusted
     $gallery = Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue
     if (-not $gallery) {
-        Write-Host "Registering PSGallery repository..." -ForegroundColor Yellow
-        Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -InstallationPolicy Trusted -Force
+        if ($DryRun) {
+            Write-Host "[DryRun] Would register PSGallery repository." -ForegroundColor Magenta
+        } else {
+            Write-Host "Registering PSGallery repository..." -ForegroundColor Yellow
+            Register-PSRepository -Name 'PSGallery' -SourceLocation 'https://www.powershellgallery.com/api/v2' -InstallationPolicy Trusted -Force
+        }
     }
     elseif ($gallery.InstallationPolicy -ne 'Trusted') {
-        Write-Host "Trusting PSGallery repository..." -ForegroundColor Yellow
-        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+        if ($DryRun) {
+            Write-Host "[DryRun] Would trust PSGallery repository." -ForegroundColor Magenta
+        } else {
+            Write-Host "Trusting PSGallery repository..." -ForegroundColor Yellow
+            Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+        }
     }
     else {
         Write-Host "PSGallery repository is already trusted." -ForegroundColor Green
@@ -30,14 +42,20 @@ Function Initialize-Prerequisites {
 
     # Ensure powershell-yaml module is available
     if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
-        Write-Host "Installing powershell-yaml module..." -ForegroundColor Yellow
-        try {
-            Install-Module powershell-yaml -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
-            Write-Host "powershell-yaml installed successfully." -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Failed to install powershell-yaml: $_" -ForegroundColor Red
+        if ($DryRun) {
+            Write-Host "[DryRun] Would install powershell-yaml module." -ForegroundColor Magenta
+            Write-Host "CRITICAL: Cannot proceed with DryRun configuration check because 'powershell-yaml' is missing." -ForegroundColor Red
             exit 1
+        } else {
+            Write-Host "Installing powershell-yaml module..." -ForegroundColor Yellow
+            try {
+                Install-Module powershell-yaml -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+                Write-Host "powershell-yaml installed successfully." -ForegroundColor Green
+            }
+            catch {
+                Write-Host "Failed to install powershell-yaml: $_" -ForegroundColor Red
+                exit 1
+            }
         }
     }
     else {
@@ -85,13 +103,17 @@ Function Install-PsModules {
             Write-Host "  '$module' is already installed." -ForegroundColor Green
         }
         else {
-            Write-Host "  '$module' not found. Installing..." -ForegroundColor Yellow
-            try {
-                Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
-                Write-Host "  '$module' installed successfully." -ForegroundColor Green
-            }
-            catch {
-                Write-Host "  Failed to install '$module': $_" -ForegroundColor Red
+            if ($DryRun) {
+                Write-Host "  [DryRun] Would install module '$module'." -ForegroundColor Magenta
+            } else {
+                Write-Host "  '$module' not found. Installing..." -ForegroundColor Yellow
+                try {
+                    Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+                    Write-Host "  '$module' installed successfully." -ForegroundColor Green
+                }
+                catch {
+                    Write-Host "  Failed to install '$module': $_" -ForegroundColor Red
+                }
             }
         }
     }
@@ -114,12 +136,16 @@ Function Install-WinGetApps {
             Write-Host "  '$appName' ($appId) is already installed." -ForegroundColor Green
         }
         else {
-            Write-Host "  '$appName' ($appId) not found. Installing..." -ForegroundColor Yellow
-            winget install --id $appId --accept-package-agreements --accept-source-agreements
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  '$appName' ($appId) installed successfully." -ForegroundColor Green
+            if ($DryRun) {
+                Write-Host "  [DryRun] Would install '$appName' ($appId)." -ForegroundColor Magenta
             } else {
-                Write-Host "  Failed to install '$appName' ($appId). Exit code: $LASTEXITCODE" -ForegroundColor Red
+                Write-Host "  '$appName' ($appId) not found. Installing..." -ForegroundColor Yellow
+                winget install --id $appId --accept-package-agreements --accept-source-agreements
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "  '$appName' ($appId) installed successfully." -ForegroundColor Green
+                } else {
+                    Write-Host "  Failed to install '$appName' ($appId). Exit code: $LASTEXITCODE" -ForegroundColor Red
+                }
             }
         }
     }
@@ -146,12 +172,16 @@ Function Install-VscodeExtensions {
 
         Write-Host "Processing VSCode extension: '$extensionName'" -ForegroundColor White
 
-        code --install-extension "$extensionId" --force
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  Successfully installed/updated: '$extensionName'" -ForegroundColor Green
-        }
-        else {
-            Write-Warning "  Failed or encountered issues installing: '$extensionName'. Exit code: $LASTEXITCODE"
+        if ($DryRun) {
+            Write-Host "  [DryRun] Would install/update extension: '$extensionName'" -ForegroundColor Magenta
+        } else {
+            code --install-extension "$extensionId" --force
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  Successfully installed/updated: '$extensionName'" -ForegroundColor Green
+            }
+            else {
+                Write-Warning "  Failed or encountered issues installing: '$extensionName'. Exit code: $LASTEXITCODE"
+            }
         }
     }
 }
@@ -172,11 +202,38 @@ Function Set-RegistrySettings {
         Write-Host "Processing registry setting: '$keyDescription'" -ForegroundColor White
 
         try {
-            if (-not (Test-Path -Path $keyPath)) {
-                New-Item -Path $keyPath -Force | Out-Null
+            # Check current value
+            $needsUpdate = $true
+            $currentValue = $null
+            $propertyExists = $false
+            
+            if (Test-Path -Path $keyPath) {
+                $existingProperty = Get-ItemProperty -Path $keyPath -Name $keyName -ErrorAction SilentlyContinue
+                if ($null -ne $existingProperty) {
+                    $propertyExists = $true
+                    $currentValue = $existingProperty.$keyName
+                    if ($currentValue -eq $keyValue) {
+                        $needsUpdate = $false
+                    }
+                }
             }
-            Set-ItemProperty -Path $keyPath -Name $keyName -Value $keyValue -Force -ErrorAction Stop
-            Write-Host "  Successfully configured registry setting: '$keyDescription'" -ForegroundColor Green
+
+            if (-not $needsUpdate) {
+                Write-Host "  Registry key '$keyPath\$keyName' is already set to '$keyValue'." -ForegroundColor Green
+            }
+            elseif ($DryRun) {
+                if (-not $propertyExists) {
+                    Write-Host "  [DryRun] Would create registry value '$keyPath\$keyName' with '$keyValue'." -ForegroundColor Magenta
+                } else {
+                    Write-Host "  [DryRun] Would update registry value '$keyPath\$keyName' to '$keyValue' (Current: '$currentValue')." -ForegroundColor Magenta
+                }
+            } else {
+                if (-not (Test-Path -Path $keyPath)) {
+                    New-Item -Path $keyPath -Force | Out-Null
+                }
+                Set-ItemProperty -Path $keyPath -Name $keyName -Value $keyValue -Force -ErrorAction Stop
+                Write-Host "  Successfully configured registry setting: '$keyDescription'" -ForegroundColor Green
+            }
         }
         catch {
             Write-Warning "  Failed or encountered issues setting registry key: '$keyDescription'. Error: $_"

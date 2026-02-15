@@ -26,6 +26,7 @@ This project is designed to drastically simplify and standardize the provisionin
 *   **Registry Configuration:** Applies custom registry settings from the configuration file.
 *   **YAML-based Configuration:** All installations are driven by a simple and readable `setup-config.yaml` file.
 *   **Idempotent:** The script can be run multiple times without causing issues. It checks if modules, apps, and extensions are already installed.
+*   **Dry Run Mode:** Supports a `-DryRun` switch to preview changes without applying them.
 *   **Automated Logging:** The script creates a log file for each execution, which is useful for troubleshooting.
 
 ## Prerequisites
@@ -53,6 +54,12 @@ Edit the `setup-config.yaml` file to specify the PowerShell modules, WinGet appl
     ```powershell
     Set-ExecutionPolicy Unrestricted -Scope Process
     .\Automate-WorkstationSetup.ps1
+    ```
+
+    **Dry Run Mode:**
+    To see what changes the script *would* make without actually installing anything or modifying settings, use the `-DryRun` switch:
+    ```powershell
+    .\Automate-WorkstationSetup.ps1 -DryRun
     ```
     The script will output its progress, indicating successful installations or any failures.
 
