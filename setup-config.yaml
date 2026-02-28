@@ -2,45 +2,72 @@
 psModules:
   - Terminal-Icons # Icons for Oh-My-Posh
 
-# Applications to install via WinGet
-WinGetApps:
+PowerShell:
+  OhMyPosh:
+    theme: 'assets/honukai.omp.json'
+
+# Applications to install
+# Each entry requires:
+#   name    - display name
+#   source  - package manager: 'winget' or 'npm'
+#   id      - WinGet package ID        (required when source: winget)
+#   package - NPM package name         (required when source: npm)
+Packages: 
+  # --------------------------------------------------------------------------
+  # Package Managers
+  # --------------------------------------------------------------------------
+  - name: NPM
+    id: OpenJS.NodeJS
+    source: winget
+
   # --------------------------------------------------------------------------
   # Core System Utilities & Enhancements
   #    - General-purpose tools essential for system management or fundamental user experience.
   # --------------------------------------------------------------------------
   - name: 7-Zip
     id: 7zip.7zip
+    source: winget
   - name: Git
     id: Git.Git
+    source: winget
   - name: WinDirStat
     id: WinDirStat.WinDirStat
+    source: winget
   - name: Oh My Posh
     id: JanDeDobbeleer.OhMyPosh
+    source: winget
   - name: PowerToys
     id: Microsoft.PowerToys
+    source: winget
   - name: Windows Terminal Preview
     id: Microsoft.WindowsTerminal.Preview
+    source: winget
   - name: Vivaldi Browser
     id: Vivaldi.Vivaldi
+    source: winget
   - name: Microsoft Windows Subsystem Linux
     id: Microsoft.WSL
+    source: winget
   - name: K-Lite Mega Codec Pack
     id: CodecGuide.K-LiteCodecPack.Mega
+    source: winget
 
   # --------------------------------------------------------------------------
   # Communication & Collaboration
   #    - Apps for messaging, video calls, and teamwork.
   # --------------------------------------------------------------------------
-  - name: WhatsApp
-    id: 9NKSQGP7F2NH # WinGet ID for WhatsApp Desktop
   - name: Keybase
     id: Keybase.Keybase # Secure messaging and file sharing
+    source: winget
   - name: KeePass
     id: DominikReichl.KeePass
+    source: winget
   - name: Microsoft Teams
     id: Microsoft.Teams
+    source: winget
   - name: Discord
     id: Discord.Discord
+    source: winget
 
   # --------------------------------------------------------------------------
   # Development & DevOps Tools
@@ -48,10 +75,13 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: Visual Studio Code
     id: Microsoft.VisualStudioCode
+    source: winget
   - name: Docker Desktop
     id: Docker.DockerDesktop
+    source: winget
   - name: Azure CLI
     id: Microsoft.AzureCLI
+    source: winget
 
   # --------------------------------------------------------------------------
   # Productivity & Office
@@ -59,24 +89,26 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: Notepad++
     id: Notepad++.Notepad++
-  - name: Microsoft Office # Note: WinGet often installs the "Microsoft 365" app, which then facilitates Office install
+    source: winget
+  - name: Microsoft Office
     id: Microsoft.Office
+    source: winget
   - name: Notion
     id: Notion.Notion
+    source: winget
   - name: SiYuan
     id: B3log.SiYuan
-
+    source: winget
 
   # --------------------------------------------------------------------------
   # Other
-  #
   # --------------------------------------------------------------------------
   - name: OBS Studio
     id: OBSProject.OBSStudio
-  - name: Parsec
-    id: Parsec.Parsec # Remote desktop for low-latency streaming/gaming
+    source: winget
   - name: VLC media player
     id: VideoLAN.VLC
+    source: winget
 
   # --------------------------------------------------------------------------
   # Specialized Tools & Runtimes
@@ -84,22 +116,31 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: Logitech Options+
     id: Logitech.OptionsPlus
+    source: winget
   - name: Logitech G HUB
     id: Logitech.GHUB
+    source: winget
   - name: Visual C++ Redistributables (2010 x86)
     id: Microsoft.VCRedist.2010.x86
+    source: winget
   - name: Visual C++ Redistributables (2012 x86)
     id: Microsoft.VCRedist.2012.x86
+    source: winget
   - name: Visual C++ Redistributables (2013 x86)
     id: Microsoft.VCRedist.2013.x86
+    source: winget
   - name: Visual C++ Redistributables (2013 x64)
     id: Microsoft.VCRedist.2013.x64
+    source: winget
   - name: Visual C++ Redistributables (2015+ x64)
     id: Microsoft.VCRedist.2015+.x64
+    source: winget
   - name: Visual C++ Redistributables (2015+ x86)
     id: Microsoft.VCRedist.2015+.x86
+    source: winget
   - name: .NET Desktop Runtime 8
     id: Microsoft.DotNet.DesktopRuntime.8
+    source: winget
 
   # --------------------------------------------------------------------------
   # Security & Privacy
@@ -107,6 +148,7 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: NordVPN
     id: NordSecurity.NordVPN
+    source: winget
 
   # --------------------------------------------------------------------------
   # AI / Machine Learning Tools
@@ -114,6 +156,16 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: LM Studio
     id: ElementLabs.LMStudio
+    source: winget
+  - name: Claude
+    id: Anthropic.Claude
+    source: winget
+  - name: Claude Code
+    id: Anthropic.ClaudeCode
+    source: winget
+  - name: Gemini CLI
+    package: "@google/gemini-cli"
+    source: npm
 
   # --------------------------------------------------------------------------
   # 3D Printing / CAD
@@ -121,6 +173,7 @@ WinGetApps:
   # --------------------------------------------------------------------------
   - name: Bambu Studio
     id: Bambulab.Bambustudio
+    source: winget
 
 # VSCode Extensions to install
 VSCodeExtensions:
@@ -138,10 +191,8 @@ VSCodeExtensions:
     id: hashicorp.terraform
   - name: Gemini Code Assist
     id: google.geminicodeassist
-  - name: Azure PowerShell Tools
-    id: azps-tools.azps-tools
-
-
+  - name: Claude Code
+    id: anthropic.claude-code
 
 # Registry settings
 RegistrySettings:

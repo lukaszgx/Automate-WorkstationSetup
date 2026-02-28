@@ -1,5 +1,6 @@
 param(
-    [switch]$DryRun
+    [switch]$DryRun,
+    [string[]]$Sections  # e.g. -Sections PsModules,Packages  (skip menu when provided)
 )
 
 # Function to check for administrator privileges
@@ -65,7 +66,7 @@ Function Initialize-Prerequisites {
 }
 
 # Function to load configuration
-Function Load-Configuration {
+Function Import-Configuration {
     param(
         [Parameter(Mandatory=$true)]
         [string]$YamlFilePath
@@ -119,38 +120,74 @@ Function Install-PsModules {
     }
 }
 
-# Function to install WinGet apps
-Function Install-WinGetApps {
+# Function to install packages from multiple sources (winget, npm)
+Function Install-Packages {
     param(
-        [System.Collections.IEnumerable]$WinGetApps
+        [System.Collections.IEnumerable]$Packages
     )
 
-    Write-Host "`n--- Installing WinGet Applications ---" -ForegroundColor Cyan
-    foreach ($appObject in $WinGetApps) {
-        $appName = $appObject.name
-        $appId = $appObject.id
-        Write-Host "Processing WinGet app: '$appName' ($appId)" -ForegroundColor White
+    Write-Host "`n--- Installing Packages ---" -ForegroundColor Cyan
 
-        winget list --id $appId --source winget --accept-source-agreements | Out-Null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  '$appName' ($appId) is already installed." -ForegroundColor Green
-        }
-        else {
-            if ($DryRun) {
-                Write-Host "  [DryRun] Would install '$appName' ($appId)." -ForegroundColor Magenta
-            } else {
-                Write-Host "  '$appName' ($appId) not found. Installing..." -ForegroundColor Yellow
-                winget install --id $appId --accept-package-agreements --accept-source-agreements
+    $npmAvailable = [bool](Get-Command "npm" -ErrorAction SilentlyContinue)
+
+    foreach ($pkg in $Packages) {
+        $pkgName   = $pkg.name
+        $pkgSource = $pkg.source
+
+        switch ($pkgSource) {
+            'winget' {
+                $pkgId = $pkg.id
+                Write-Host "Processing [winget] '$pkgName' ($pkgId)" -ForegroundColor White
+
+                winget list --id $pkgId --source winget --accept-source-agreements | Out-Null
                 if ($LASTEXITCODE -eq 0) {
-                    Write-Host "  '$appName' ($appId) installed successfully." -ForegroundColor Green
+                    Write-Host "  '$pkgName' is already installed." -ForegroundColor Green
                 } else {
-                    Write-Host "  Failed to install '$appName' ($appId). Exit code: $LASTEXITCODE" -ForegroundColor Red
+                    if ($DryRun) {
+                        Write-Host "  [DryRun] Would install '$pkgName' ($pkgId)." -ForegroundColor Magenta
+                    } else {
+                        Write-Host "  Installing '$pkgName'..." -ForegroundColor Yellow
+                        winget install --id $pkgId --accept-package-agreements --accept-source-agreements
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "  '$pkgName' installed successfully." -ForegroundColor Green
+                        } else {
+                            Write-Host "  Failed to install '$pkgName'. Exit code: $LASTEXITCODE" -ForegroundColor Red
+                        }
+                    }
                 }
+            }
+            'npm' {
+                $pkgPackage = $pkg.package
+                Write-Host "Processing [npm]    '$pkgName' ($pkgPackage)" -ForegroundColor White
+
+                if (-not $npmAvailable) {
+                    Write-Host "  NPM not found in PATH. Skipping '$pkgName'." -ForegroundColor Yellow
+                    continue
+                }
+
+                npm list -g --depth=0 $pkgPackage 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "  '$pkgName' is already installed globally." -ForegroundColor Green
+                } else {
+                    if ($DryRun) {
+                        Write-Host "  [DryRun] Would install '$pkgName' ($pkgPackage) globally." -ForegroundColor Magenta
+                    } else {
+                        Write-Host "  Installing '$pkgName'..." -ForegroundColor Yellow
+                        npm install -g $pkgPackage
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host "  '$pkgName' installed successfully." -ForegroundColor Green
+                        } else {
+                            Write-Host "  Failed to install '$pkgName'. Exit code: $LASTEXITCODE" -ForegroundColor Red
+                        }
+                    }
+                }
+            }
+            default {
+                Write-Host "  Unknown source '$pkgSource' for '$pkgName'. Skipping." -ForegroundColor Red
             }
         }
     }
 }
-
 
 
 # Function to install VSCode extensions
@@ -241,6 +278,99 @@ Function Set-RegistrySettings {
     }
 }
 
+# Function to set up PowerShell profile
+Function Initialize-PowerShellProfile {
+    param(
+        [string]$OhMyPoshTheme
+    )
+
+    Write-Host "`n--- Setting up PowerShell profile ---" -ForegroundColor Cyan
+
+    $profilePath = $PROFILE
+    $profileDir = Split-Path -Path $profilePath -Parent
+
+    if (-not (Test-Path -Path $profileDir)) {
+        if ($DryRun) {
+            Write-Host "[DryRun] Would create profile directory at '$profileDir'." -ForegroundColor Magenta
+        } else {
+            New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
+            Write-Host "Created profile directory at '$profileDir'." -ForegroundColor Green
+        }
+    }
+
+    if (-not (Test-Path -Path $OhMyPoshTheme)) {
+        Write-Warning "Oh My Posh theme file not found at '$OhMyPoshTheme'. Skipping profile setup."
+        return
+    }
+
+    $themeDestPath = Join-Path -Path $profileDir -ChildPath (Split-Path -Path $OhMyPoshTheme -Leaf)
+    if ($DryRun) {
+        Write-Host "[DryRun] Would copy Oh My Posh theme from '$OhMyPoshTheme' to '$themeDestPath'." -ForegroundColor Magenta
+    } else {
+        Copy-Item -Path $OhMyPoshTheme -Destination $themeDestPath -Force
+        Write-Host "Successfully copied Oh My Posh theme to '$themeDestPath'." -ForegroundColor Green
+    }
+
+    $profileContent = @"
+Import-Module -Name Terminal-Icons
+oh-my-posh --init --shell pwsh --config "$themeDestPath" | Invoke-Expression
+"@
+
+    $existingContent = if (Test-Path $profilePath) { Get-Content $profilePath -Raw } else { "" }
+    
+    if ($existingContent -match "oh-my-posh --init") {
+        Write-Host "PowerShell profile already seems to be configured for Oh My Posh. Skipping." -ForegroundColor Green
+        return
+    }
+
+    if ($DryRun) {
+        Write-Host "[DryRun] Would append the following to '$profilePath':" -ForegroundColor Magenta
+        Write-Host $profileContent -ForegroundColor Magenta
+    } else {
+        Add-Content -Path $profilePath -Value $profileContent
+        Write-Host "Successfully configured PowerShell profile for Oh My Posh." -ForegroundColor Green
+    }
+}
+
+
+
+# Function to display an interactive section selection menu
+Function Show-SectionMenu {
+    $options = [ordered]@{
+        '1' = @{ Label = 'PS Modules';           Key = 'PsModules' }
+        '2' = @{ Label = 'Packages (winget/npm)'; Key = 'Packages'  }
+        '3' = @{ Label = 'VSCode Extensions';    Key = 'VSCode'    }
+        '4' = @{ Label = 'Registry Settings';    Key = 'Registry'  }
+        '5' = @{ Label = 'PowerShell Profile';   Key = 'PsProfile' }
+        'A' = @{ Label = 'All sections';         Key = 'All'       }
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "    Workstation Setup - Section Menu"     -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "Select sections to run (comma-separated):" -ForegroundColor White
+    Write-Host ""
+    foreach ($key in $options.Keys) {
+        Write-Host "  [$key] $($options[$key].Label)" -ForegroundColor White
+    }
+    Write-Host ""
+
+    do {
+        $raw     = (Read-Host "Enter selection").Trim().ToUpper()
+        $choices = $raw -split '[,\s]+' | Where-Object { $_ -ne '' }
+        $invalid = $choices | Where-Object { -not $options.Contains($_) }
+        if ($invalid) {
+            Write-Host "Invalid option(s): $($invalid -join ', '). Please try again." -ForegroundColor Red
+        }
+    } while ($invalid)
+
+    if ($choices -contains 'A') {
+        return @('PsModules', 'Packages', 'VSCode', 'Registry', 'PsProfile')
+    }
+    return $choices | ForEach-Object { $options[$_].Key }
+}
+
+
 # Main function
 Function Invoke-Main {
     $logDir = Join-Path -Path $PSScriptRoot -ChildPath "logs"
@@ -254,22 +384,40 @@ Function Invoke-Main {
         Test-Administrator
         Initialize-Prerequisites
 
-        $config = Load-Configuration -YamlFilePath (Join-Path -Path $PSScriptRoot -ChildPath "setup-config.yaml")
+        $config = Import-Configuration -YamlFilePath (Join-Path -Path $PSScriptRoot -ChildPath "setup-config.yaml")
         if ($null -eq $config) {
             exit 1
         }
 
-        if ($config.psModules) {
+        # Determine which sections to run
+        $sectionsToRun = if ($Sections -and $Sections.Count -gt 0) {
+            Write-Host "Sections provided via parameter: $($Sections -join ', ')" -ForegroundColor White
+            if ('All' -in $Sections) {
+                @('PsModules', 'Packages', 'VSCode', 'Registry', 'PsProfile')
+            } else {
+                $Sections
+            }
+        } else {
+            Show-SectionMenu
+        }
+
+        if ('PsModules' -in $sectionsToRun -and $config.psModules) {
             Install-PsModules -PSRequiredModules $config.psModules
         }
-        if ($config.WinGetApps) {
-            Install-WinGetApps -WinGetApps $config.WinGetApps
+        if ('Packages' -in $sectionsToRun -and $config.Packages) {
+            Install-Packages -Packages $config.Packages
         }
-        if ($config.VSCodeExtensions) {
+        if ('VSCode' -in $sectionsToRun -and $config.VSCodeExtensions) {
             Install-VscodeExtensions -VSCodeExtensions $config.VSCodeExtensions
         }
-        if ($config.RegistrySettings) {
+        if ('Registry' -in $sectionsToRun -and $config.RegistrySettings) {
             Set-RegistrySettings -RegistrySettings $config.RegistrySettings
+        }
+        if ('PsProfile' -in $sectionsToRun -and $config.PowerShell) {
+            if ($config.PowerShell.OhMyPosh.theme) {
+                $themePath = Join-Path -Path $PSScriptRoot -ChildPath $config.PowerShell.OhMyPosh.theme
+                Initialize-PowerShellProfile -OhMyPoshTheme $themePath
+            }
         }
 
         Write-Host "`n--- All installation/configuration tasks complete! ---" -ForegroundColor Green
